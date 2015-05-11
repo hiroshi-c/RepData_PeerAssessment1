@@ -7,8 +7,26 @@ output:
 
 
 ## Loading and preprocessing the data
+First, unzip the provided zip file in the current directoy, and then read it.
+```{r }
+unzip("activity.zip", files=c("activity.csv"))
+rawdata <- read.csv("activity.csv")
+```
 
+Second, convert the string representation of date column as Date class.
+```{r }
+rawdata$date <- as.Date(rawdata$date, "%Y-%m-%d")
+```
 
+Display a few observations.
+```{r }
+head(rawdata)
+```
+
+Display the summary.
+```{r }
+summary(rawdata)
+```
 
 ## What is mean total number of steps taken per day?
 
