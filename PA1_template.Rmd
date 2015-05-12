@@ -5,32 +5,55 @@ output:
     keep_md: true
 ---
 
-
 ## Loading and preprocessing the data
 First, unzip the provided zip file in the current directoy, and then read it.
 ```{r }
-unzip("activity.zip", files=c("activity.csv"))
-rawdata <- read.csv("activity.csv")
+unzip("activity.zip", overwrite = TRUE)
+rawData <- read.csv("activity.csv")
 ```
 
-Second, convert the string representation of date column as Date class.
+Second, preprocess raw data.
+Steps column is as-is.
+Convert string representation of date to Date class.
+Convert integer representation of time of the day to minutes since midnight.
+For example, integer value 1155 in raw data means 11:55 of the day.
 ```{r }
-rawdata$date <- as.Date(rawdata$date, "%Y-%m-%d")
+preprocessedData <- data.frame(steps = rawData$steps)
+preprocessedData$date <- as.Date(rawData$date, "%Y-%m-%d")
+preprocessedData$interval <- rawData$interval %/% 100 * 60 + rawData$interval %% 100
 ```
 
 Display a few observations.
 ```{r }
-head(rawdata)
+head(preprocessedData)
+tail(preprocessedData)
 ```
 
 Display the summary.
 ```{r }
-summary(rawdata)
+summary(preprocessedData)
 ```
 
 ## What is mean total number of steps taken per day?
+Calculate the total number of steps taken each day.
+```{r }
+totalStepsPerDay <- tapply(preprocessedData$steps, preprocessedData$date, sum)
+```
 
+Draw histogram.
+```{r }
+hist(totalStepsPerDay)
+```
 
+Calucate the mean total number of steps taken per day.
+```{r }
+mean(totalStepsPerDay, na.rm = TRUE)
+```
+
+Calculate the median total number of steps taken per day.
+```{r }
+median(totalStepsPerDay, na.rm = TRUE)
+```
 
 ## What is the average daily activity pattern?
 
