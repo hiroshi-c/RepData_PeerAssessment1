@@ -7,7 +7,7 @@ output:
 
 ## Loading and preprocessing the data
 First, unzip the provided zip file in the current directoy, and then read it.
-```{r }
+```{r}
 unzip("activity.zip", overwrite = TRUE)
 rawData <- read.csv("activity.csv")
 ```
@@ -17,50 +17,73 @@ Steps column is as-is.
 Convert string representation of date to Date class.
 Convert integer representation of time of the day to minutes since midnight.
 For example, integer value 1155 in raw data means 11:55 of the day.
-```{r }
+```{r}
 preprocessedData <- data.frame(steps = rawData$steps)
 preprocessedData$date <- as.Date(rawData$date, "%Y-%m-%d")
 preprocessedData$interval <- rawData$interval %/% 100 * 60 + rawData$interval %% 100
 ```
 
 Display a few observations.
-```{r }
+```{r}
 head(preprocessedData)
 tail(preprocessedData)
 ```
 
 Display the summary.
-```{r }
+```{r}
 summary(preprocessedData)
 ```
 
 ## What is mean total number of steps taken per day?
 Calculate the total number of steps taken each day.
-```{r }
+```{r}
 totalStepsPerDay <- tapply(preprocessedData$steps, preprocessedData$date, sum)
 ```
 
 Draw histogram.
-```{r }
+```{r}
 hist(totalStepsPerDay)
 ```
 
 Calucate the mean total number of steps taken per day.
-```{r }
+```{r}
 mean(totalStepsPerDay, na.rm = TRUE)
 ```
 
 Calculate the median total number of steps taken per day.
-```{r }
+```{r}
 median(totalStepsPerDay, na.rm = TRUE)
 ```
 
 ## What is the average daily activity pattern?
+Calculate the average steps of each 5-minute interval, and plot it.
+```{r fig.height=4}
+meanStepsPerIntervalArray <- tapply(preprocessedData$steps, preprocessedData$interval, mean, na.rm=TRUE)
+meanStepsPerInterval <- data.frame(interval=as.numeric(names(meanStepsPerIntervalArray)), steps=meanStepsPerIntervalArray)
+par(mar=c(5,4,1,1), las=1)
+plot(meanStepsPerInterval$interval, meanStepsPerInterval$steps, type="l", xlab="Interval (minutes)", ylab="Number of steps")
+```
 
-
+Find the 5-minute interval which has the maximum number of steps taken in a day.
+```{r}
+maxInterval = meanStepsPerInterval$interval[which.max(meanStepsPerInterval$steps)]
+maxHour = maxInterval %/% 60
+maxMinute = maxInterval %% 60
+print(sprintf("Maximum interval is at %d minutes, or %02d:%02d", maxInterval, maxHour, maxMinute))
+```
 
 ## Imputing missing values
+The toal number of missing values in the dataset.
+```{r}
+sum(is.na(preprocessedData$steps))
+```
 
+Use mean value of 5-minute interval as missing value of that 5 minute interval of the days with NA.
+Creating the new data set by filling missing values.
+```{r}
+interpolatedData <- preprocessedData
+#interpolatedData$steps[is.na(interpolatedData$steps)]<-meanStepsPerInterval$steps[names(meanStepsPerInterval) == interpolatedData$interval]
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
