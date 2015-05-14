@@ -78,11 +78,22 @@ The toal number of missing values in the dataset.
 sum(is.na(preprocessedData$steps))
 ```
 
-Use mean value of 5-minute interval as missing value of that 5 minute interval of the days with NA.
+Use mean value of 5-minute interval as missing value for the days with NA.
 Creating the new data set by filling missing values.
 ```{r}
 interpolatedData <- preprocessedData
-#interpolatedData$steps[is.na(interpolatedData$steps)]<-meanStepsPerInterval$steps[names(meanStepsPerInterval) == interpolatedData$interval]
+for (i in 1:nrow(interpolatedData)){
+    if (is.na(interpolatedData[i,]$steps)){
+        interpolatedData[i,]$steps <-
+            meanStepsPerInterval[which(meanStepsPerInterval$interval == interpolatedData[i,]$interval),]$steps
+    }
+}
+totalStepsPerDayInterpolated <- tapply(interpolatedData$steps, interpolatedData$date, sum)
+```
+
+Draw histogram.
+```{r}
+hist(totalStepsPerDayInterpolated)
 ```
 
 
