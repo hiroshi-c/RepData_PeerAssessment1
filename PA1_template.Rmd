@@ -5,6 +5,13 @@ output:
     keep_md: true
 ---
 
+First of all, load all required libraries and set the locale as English.
+```{r results='hide'}
+library(plyr)
+library(lattice)
+Sys.setlocale(category = "LC_ALL", locale = "English_United States.1252")
+```
+
 ## Loading and preprocessing the data
 First, unzip the provided zip file in the current directoy, and then read it.
 ```{r}
@@ -41,8 +48,9 @@ totalStepsPerDay <- tapply(preprocessedData$steps, preprocessedData$date, sum)
 ```
 
 Draw histogram.
-```{r}
-hist(totalStepsPerDay)
+```{r fig.height=4}
+par(mar=c(5,4,1,1), las=1)
+hist(totalStepsPerDay, main="", xlab="Total steps per day")
 ```
 
 Calucate the mean total number of steps taken per day.
@@ -91,10 +99,49 @@ for (i in 1:nrow(interpolatedData)){
 totalStepsPerDayInterpolated <- tapply(interpolatedData$steps, interpolatedData$date, sum)
 ```
 
-Draw histogram.
+Draw histogram. Compare interpolated data and original data.
 ```{r}
-hist(totalStepsPerDayInterpolated)
+par(mfrow=c(1,2))
+hist(totalStepsPerDayInterpolated, main="Histogram after Interpolation", xlab="Total steps per day", ylim=c(0,35))
+hist(totalStepsPerDay, main="Histogram before Interpolation", xlab="Total steps per day", ylim=c(0,35))
 ```
 
+Calucate the mean total number of steps taken per day.
+```{r}
+mean(totalStepsPerDayInterpolated)
+```
+
+Calculate the median total number of steps taken per day.
+```{r}
+median(totalStepsPerDayInterpolated)
+```
+
+Mean value is not changed before and after interpolation.
+Histogram after interpolation has additional 7 days only at the center distribution.
+Table below proves that this data set has only days with all valid data and days with all missing data.
+This naturally ends up that per day mean value is uncahnged by this interpolation.
+```{r}
+table(preprocessedData$date, is.na(preprocessedData$steps))
+```
+
+Median value is changed, and it is now as same as mean value after the interpolation.
+This is not inveitable result.
+But, total steps of all interpolated days are as same as mean value,
+one of these days is easily placed in the median position.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+Add new factor variable to indicate weekdays/weekends to the data frame.
+```{r}
+preprocessedData$category <- ifelse(weekdays(preprocessedData$date) %in% c("Saturday", "Sunday"), "weekend", "weekday")
+meanStepsPerIntervalCategory <- ddply(preprocessedData, .(interval, category), summarize, steps = mean(steps, na.rm=TRUE))
+```
+
+Make a panel plot for weekdays and weekends.
+```{r}
+with(meanStepsPerIntervalCategory,
+     xyplot(steps ~ interval | category, xlab="Interval (minutes)", ylab="Number of steps", type="l", layout=c(1,2)))
+```
+
+Weekdays have strong peak in the morning, while weekends have constant steps throughout the daytime.
+Weekdays have distinctive activity early in the moring before 8:00am (480 minutes).
+Weekends continue to have activity late night up to 9:00pm (1260 minutes).
