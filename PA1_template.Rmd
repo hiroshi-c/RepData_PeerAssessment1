@@ -66,8 +66,7 @@ median(totalStepsPerDay, na.rm = TRUE)
 ## What is the average daily activity pattern?
 Calculate the average steps of each 5-minute interval, and plot it.
 ```{r fig.height=4}
-meanStepsPerIntervalArray <- tapply(preprocessedData$steps, preprocessedData$interval, mean, na.rm=TRUE)
-meanStepsPerInterval <- data.frame(interval=as.numeric(names(meanStepsPerIntervalArray)), steps=meanStepsPerIntervalArray)
+meanStepsPerInterval <- ddply(preprocessedData, .(interval), summarize, steps = mean(steps, na.rm=TRUE))
 par(mar=c(5,4,1,1), las=1)
 plot(meanStepsPerInterval$interval, meanStepsPerInterval$steps, type="l", xlab="Interval (minutes)", ylab="Number of steps")
 ```
